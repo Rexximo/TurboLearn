@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1005735315637",
+    "project_id": "turbolearn-3f547",
+    "storage_bucket": "turbolearn-3f547.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005735315637:android:d9d32658ffc08052c356fc",
+        "android_client_info": {
+          "package_name": "com.example.turbolearn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXhLHgiV4U5emWeOhzCO7BZx3l_F_eaDw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
