@@ -122,12 +122,31 @@
                 android:textStyle="italic"
                 tools:text="25/12/2024 14:30" />
 
-            <!-- Priority Indicator -->
-            <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@drawable/priority_indicator"
-                android:layout_marginStart="8dp" />
+            <!-- Priority TextView -->
+            <TextView
+                android:id="@+id/textViewPriority"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Medium"
+                android:textSize="12sp"
+                android:padding="4dp" />
+
+            <!-- Overdue Indicator -->
+            <TextView
+                android:id="@+id/textViewOverdue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OVERDUE"
+                android:textSize="10sp"
+                android:visibility="gone" />
+
+            <!-- Toggle Complete Button -->
+            <ImageButton
+                android:id="@+id/buttonToggleComplete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_circle"
+                android:background="?attr/selectableItemBackgroundBorderless" />
 
         </LinearLayout>
 

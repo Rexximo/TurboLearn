@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -29,13 +30,13 @@ public class EditTaskActivity extends AppCompatActivity {
     private TextInputEditText editTextTitle, editTextDescription;
     private Button buttonSelectDate, buttonSelectTime, buttonUpdateTask;
     private TextView textViewDateTime;
-    private Spinner spinnerCategory;
+    private Spinner spinnerCategory, spinnerPriority;
     private FirebaseFirestore db;
 
-    private String selectedDate = "";
-    private String selectedTime = "";
     private Calendar calendar;
+    private Date selectedDateTime;
     private String taskId;
+    private Task currentTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,7 @@ public class EditTaskActivity extends AppCompatActivity {
 
         initializeViews();
         setupFirestore();
-        setupSpinner();
+        setupSpinners();
         setupDateTimePickers();
         setupUpdateButton();
         loadTaskData();
@@ -58,6 +59,7 @@ public class EditTaskActivity extends AppCompatActivity {
         buttonUpdateTask = findViewById(R.id.buttonUpdateTask);
         textViewDateTime = findViewById(R.id.textViewDateTime);
         spinnerCategory = findViewById(R.id.spinnerCategory);
+        spinnerPriority = findViewById(R.id.spinnerPriority);
         calendar = Calendar.getInstance();
     }
 
@@ -65,12 +67,35 @@ public class EditTaskActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
     }
 
-    private void setupSpinner() {
-        String[] categories = {"Easy", "Hard"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+    private void setupSpinners() {
+        setupCategorySpinner();
+        setupPrioritySpinner();
+    }
+
+    private void setupCategorySpinner() {
+        // Create array of category display names
+        String[] categories = new String[Task.TaskCategory.values().length];
+        for (int i = 0; i < Task.TaskCategory.values().length; i++) {
+            categories[i] = Task.TaskCategory.values()[i].getDisplayName();
+        }
+
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, categories);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+    }
+
+    private void setupPrioritySpinner() {
+        // Create array of priority display names
+        String[] priorities = new String[Task.Priority.values().length];
+        for (int i = 0; i < Task.Priority.values().length; i++) {
+            priorities[i] = Task.Priority.values()[i].getDisplayName();
+        }
+
+        ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, priorities);
+        priorityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPriority.setAdapter(priorityAdapter);
     }
 
     private void setupDateTimePickers() {
@@ -80,31 +105,76 @@ public class EditTaskActivity extends AppCompatActivity {
 
     private void loadTaskData() {
         taskId = getIntent().getStringExtra("task_id");
-        String title = getIntent().getStringExtra("task_title");
-        String description = getIntent().getStringExtra("task_description");
-        selectedDate = getIntent().getStringExtra("task_date");
-        selectedTime = getIntent().getStringExtra("task_time");
-        String category = getIntent().getStringExtra("task_category");
 
-        // Set default values if data is null
-        if (title != null) editTextTitle.setText(title);
-        if (description != null) editTextDescription.setText(description);
-        if (selectedDate == null) selectedDate = "";
-        if (selectedTime == null) selectedTime = "";
+        if (taskId == null) {
+            Toast.makeText(this, "Task ID not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
+        // Load task from Firestore
+        db.collection("tasks")
+                .document(taskId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        currentTask = documentSnapshot.toObject(Task.class);
+                        if (currentTask != null) {
+                            populateTaskData();
+                        }
+                    } else {
+                        Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error loading task", e);
+                    Toast.makeText(this, "Failed to load task: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    finish();
+                });
+    }
+
+    private void populateTaskData() {
+        if (currentTask == null) return;
+
+        // Set text fields
+        editTextTitle.setText(currentTask.getTitle());
+        editTextDescription.setText(currentTask.getDescription());
+
+        // Set date and time
+        selectedDateTime = currentTask.getDueDate();
         updateDateTimeDisplay();
 
-        // Set spinner selection
-        String[] categories = {"Easy", "Hard"};
-        for (int i = 0; i < categories.length; i++) {
-            if (categories[i].equals(category)) {
-                spinnerCategory.setSelection(i);
-                break;
+        // Set category spinner
+        if (currentTask.getCategory() != null) {
+            Task.TaskCategory[] categories = Task.TaskCategory.values();
+            for (int i = 0; i < categories.length; i++) {
+                if (categories[i] == currentTask.getCategory()) {
+                    spinnerCategory.setSelection(i);
+                    break;
+                }
+            }
+        }
+
+        // Set priority spinner
+        if (currentTask.getPriority() != null) {
+            Task.Priority[] priorities = Task.Priority.values();
+            for (int i = 0; i < priorities.length; i++) {
+                if (priorities[i] == currentTask.getPriority()) {
+                    spinnerPriority.setSelection(i);
+                    break;
+                }
             }
         }
     }
 
     private void showDatePicker() {
+        // Use current selected date or today's date
+        Calendar calendarToUse = Calendar.getInstance();
+        if (selectedDateTime != null) {
+            calendarToUse.setTime(selectedDateTime);
+        }
+
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, year, month, dayOfMonth) -> {
@@ -112,51 +182,62 @@ public class EditTaskActivity extends AppCompatActivity {
                     calendar.set(Calendar.MONTH, month);
                     calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                    selectedDate = dateFormat.format(calendar.getTime());
+                    // Keep the existing time if already set
+                    if (selectedDateTime != null) {
+                        Calendar existingTime = Calendar.getInstance();
+                        existingTime.setTime(selectedDateTime);
+                        calendar.set(Calendar.HOUR_OF_DAY, existingTime.get(Calendar.HOUR_OF_DAY));
+                        calendar.set(Calendar.MINUTE, existingTime.get(Calendar.MINUTE));
+                    }
+
+                    selectedDateTime = calendar.getTime();
                     updateDateTimeDisplay();
                 },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
+                calendarToUse.get(Calendar.YEAR),
+                calendarToUse.get(Calendar.MONTH),
+                calendarToUse.get(Calendar.DAY_OF_MONTH)
         );
         datePickerDialog.show();
     }
 
     private void showTimePicker() {
+        // Use current selected time or current time
+        Calendar calendarToUse = Calendar.getInstance();
+        if (selectedDateTime != null) {
+            calendarToUse.setTime(selectedDateTime);
+        }
+
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 this,
                 (view, hourOfDay, minute) -> {
+                    // If no date selected, use today's date
+                    if (selectedDateTime == null) {
+                        calendar.setTime(new Date());
+                    } else {
+                        calendar.setTime(selectedDateTime);
+                    }
+
                     calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     calendar.set(Calendar.MINUTE, minute);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
 
-                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                    selectedTime = timeFormat.format(calendar.getTime());
+                    selectedDateTime = calendar.getTime();
                     updateDateTimeDisplay();
                 },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
+                calendarToUse.get(Calendar.HOUR_OF_DAY),
+                calendarToUse.get(Calendar.MINUTE),
                 true
         );
         timePickerDialog.show();
     }
 
     private void updateDateTimeDisplay() {
-        String dateTime = "";
-        if (!selectedDate.isEmpty()) {
-            dateTime += selectedDate;
-        }
-        if (!selectedTime.isEmpty()) {
-            if (!dateTime.isEmpty()) {
-                dateTime += " ";
-            }
-            dateTime += selectedTime;
-        }
-
-        if (dateTime.isEmpty()) {
-            textViewDateTime.setText("No date and time selected");
+        if (selectedDateTime != null) {
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            textViewDateTime.setText(displayFormat.format(selectedDateTime));
         } else {
-            textViewDateTime.setText(dateTime);
+            textViewDateTime.setText("No date and time selected");
         }
     }
 
@@ -167,7 +248,10 @@ public class EditTaskActivity extends AppCompatActivity {
     private void updateTask() {
         String title = editTextTitle.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
-        String category = spinnerCategory.getSelectedItem().toString();
+
+        // Get selected category and priority
+        Task.TaskCategory selectedCategory = Task.TaskCategory.values()[spinnerCategory.getSelectedItemPosition()];
+        Task.Priority selectedPriority = Task.Priority.values()[spinnerPriority.getSelectedItemPosition()];
 
         // Validasi input
         if (TextUtils.isEmpty(title)) {
@@ -176,19 +260,8 @@ public class EditTaskActivity extends AppCompatActivity {
             return;
         }
 
-        if (TextUtils.isEmpty(description)) {
-            editTextDescription.setError("Description is required");
-            editTextDescription.requestFocus();
-            return;
-        }
-
-        if (TextUtils.isEmpty(selectedDate)) {
-            Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (TextUtils.isEmpty(selectedTime)) {
-            Toast.makeText(this, "Please select a time", Toast.LENGTH_SHORT).show();
+        if (selectedDateTime == null) {
+            Toast.makeText(this, "Please select date and time", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -201,34 +274,41 @@ public class EditTaskActivity extends AppCompatActivity {
         buttonUpdateTask.setEnabled(false);
         buttonUpdateTask.setText("Updating...");
 
-        // Buat map data untuk update
-        Map<String, Object> taskData = new HashMap<>();
-        taskData.put("title", title);
-        taskData.put("description", description);
-        taskData.put("date", selectedDate);
-        taskData.put("time", selectedTime);
-        taskData.put("category", category);
-        taskData.put("updatedAt", System.currentTimeMillis());
+        // Update current task object
+        try {
+            currentTask.setTitle(title);
+            currentTask.setDescription(description);
+            currentTask.setDueDate(selectedDateTime);
+            currentTask.setCategory(selectedCategory);
+            currentTask.setPriority(selectedPriority);
 
-        // Update task di Firestore
-        db.collection("tasks")
-                .document(taskId)
-                .update(taskData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Task updated successfully");
-                    Toast.makeText(EditTaskActivity.this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+            // Update task di Firestore
+            db.collection("tasks")
+                    .document(taskId)
+                    .set(currentTask)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Task updated successfully");
+                        Toast.makeText(EditTaskActivity.this, "Task updated successfully", Toast.LENGTH_SHORT).show();
 
-                    // Kembali ke activity sebelumnya
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error updating task", e);
-                    Toast.makeText(EditTaskActivity.this, "Failed to update task: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        // Kembali ke activity sebelumnya
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error updating task", e);
+                        Toast.makeText(EditTaskActivity.this, "Failed to update task: " + e.getMessage(), Toast.LENGTH_LONG).show();
 
-                    // Enable button kembali jika gagal
-                    buttonUpdateTask.setEnabled(true);
-                    buttonUpdateTask.setText("Update Task");
-                });
+                        // Enable button kembali jika gagal
+                        buttonUpdateTask.setEnabled(true);
+                        buttonUpdateTask.setText("Update Task");
+                    });
+        } catch (Exception e) {
+            Log.w(TAG, "Error updating task data", e);
+            Toast.makeText(this, "Error updating task: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+            // Enable button kembali jika gagal
+            buttonUpdateTask.setEnabled(true);
+            buttonUpdateTask.setText("Update Task");
+        }
     }
 
     @Override
