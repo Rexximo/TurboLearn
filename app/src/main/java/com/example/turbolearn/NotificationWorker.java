@@ -1,45 +1,53 @@
 package com.example.turbolearn;
 
-import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
+public class TaskActionReceiver extends BroadcastReceiver {
 
-public class NotificationWorker extends Worker {
-
-    private static final String CHANNEL_ID = "task_reminder_channel";
-
-    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
-    }
-
-    @NonNull
     @Override
-    public Result doWork() {
-        String taskTitle = getInputData().getString("task_title");
-        String taskDescription = getInputData().getString("task_description");
-        String taskId = getInputData().getString("task_id");
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        String taskId = intent.getStringExtra("task_id");
 
-        assert taskId != null;
-        showNotification(taskTitle, taskDescription, taskId);
+        if (taskId == null) {
+            return;
+        }
 
-        return Result.success();
+        switch (action) {
+            case "COMPLETE_TASK":
+                handleCompleteTask(context, taskId);
+                break;
+            case "SNOOZE_TASK":
+                handleSnoozeTask(context, taskId);
+                break;
+        }
     }
 
-    private void showNotification(String title, String description, String taskId) {
-        NotificationManager notificationManager =
-                (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+    private void handleCompleteTask(Context context, String taskId) {
+        // Here you would typically:
+        // 1. Update the task in your database to mark it as completed
+        // 2. Cancel any pending notifications for this task
+        // 3. Show a confirmation toast
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("Task Reminder: " + title)
-                .setContentText(description)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true);
+        NotificationHelper.cancelNotification(context, taskId);
+        Toast.makeText(context, "Task marked as completed", Toast.LENGTH_SHORT).show();
 
-        notificationManager.notify(taskId.hashCode(), builder.build());
+        // TODO: Integrate with your database/repository to actually update the task
+        // Example: TaskRepository.getInstance().markTaskAsCompleted(taskId);
+    }
+
+    private void handleSnoozeTask(Context context, String taskId) {
+        // Here you would typically:
+        // 1. Reschedule the notification for a later time (e.g., 15 minutes)
+        // 2. Show a confirmation toast
+
+        NotificationHelper.cancelNotification(context, taskId);
+        Toast.makeText(context, "Task snoozed for 15 minutes", Toast.LENGTH_SHORT).show();
+
+        // TODO: Integrate with your database/repository to reschedule the task
+        // Example: TaskRepository.getInstance().snoozeTask(taskId, 15);
     }
 }
