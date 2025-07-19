@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1005735315637",
+    "firebase_url": "https://turbolearn-3f547-default-rtdb.firebaseio.com",
     "project_id": "turbolearn-3f547",
     "storage_bucket": "turbolearn-3f547.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.turbolearn"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1005735315637-hhd8lhlimkem7rpse25nkpik26c01mco.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.turbolearn",
+            "certificate_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+          }
+        },
+        {
+          "client_id": "1005735315637-rt4ftc4mtlb0l3bobrn67f8fg14mkpq6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDXhLHgiV4U5emWeOhzCO7BZx3l_F_eaDw"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1005735315637-rt4ftc4mtlb0l3bobrn67f8fg14mkpq6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

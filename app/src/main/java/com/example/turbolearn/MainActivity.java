@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,10 +30,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     private static final String TAG = "MainActivity";
     private static final int EDIT_TASK_REQUEST = 1001;
+    private static final int ADD_TASK_REQUEST = 1002;
 
     private RecyclerView recyclerViewTasks;
     private TaskAdapter taskAdapter;
     private List<Task> taskList;
+    private List<Task> filteredTaskList;
     private FirebaseFirestore db;
     private Spinner spinnerCategory;
     private String selectedCategory = "All";
@@ -127,7 +131,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private void setupRecyclerView() {
         try {
             taskList = new ArrayList<>();
-            taskAdapter = new TaskAdapter(taskList, this, this);
+            filteredTaskList = new ArrayList<>();
+            taskAdapter = new TaskAdapter(filteredTaskList, this, this);
             recyclerViewTasks.setLayoutManager(new LinearLayoutManager(this));
             recyclerViewTasks.setAdapter(taskAdapter);
         } catch (Exception e) {
@@ -148,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     selectedCategory = categories[position];
-                    loadTasks();
+                    filterTasks();
                 }
 
                 @Override
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             fabAddTask.setOnClickListener(v -> {
                 try {
                     Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent, ADD_TASK_REQUEST);
                 } catch (Exception e) {
                     Log.e(TAG, "Error starting AddTaskActivity", e);
                     Toast.makeText(this, "Failed to open add task screen", Toast.LENGTH_SHORT).show();
@@ -184,46 +189,78 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     }
 
     private void loadTasks() {
-        try {
-            if (db == null) {
-                Log.e(TAG, "Firestore instance is null");
-                return;
-            }
+        // Basic validations
+        if (db == null) {
+            Log.e(TAG, "Database not available");
+            return;
+        }
 
-            Query query = db.collection("tasks").orderBy("timestamp", Query.Direction.DESCENDING);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Log.e(TAG, "User not authenticated");
+            return;
+        }
 
-            query.addSnapshotListener((value, error) -> {
-                if (error != null) {
-                    Log.w(TAG, "Error loading tasks", error);
-                    Toast.makeText(this, "Error loading tasks: " + error.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        String userId = currentUser.getUid();
 
-                try {
-                    taskList.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot doc : value) {
-                            Task task = doc.toObject(Task.class);
-                            task.setId(doc.getId());
+        db.collection("tasks")
+                .whereEqualTo("userId", userId)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
 
-                            if (selectedCategory.equals("All") || matchesCategory(task, selectedCategory)) {
+                    try {
+                        if (taskList == null) {
+                            taskList = new ArrayList<>();
+                        }
+
+                        taskList.clear();
+
+                        if (queryDocumentSnapshots != null) {
+                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                Task task = doc.toObject(Task.class);
+                                task.setId(doc.getId());
                                 taskList.add(task);
                             }
                         }
-                    }
 
-                    if (taskAdapter != null) {
-                        taskAdapter.notifyDataSetChanged();
-                    }
+                        filterTasks();
+                        Log.d(TAG, "Tasks loaded: " + taskList.size());
 
-                    Log.d(TAG, "Tasks loaded successfully: " + taskList.size() + " tasks");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error processing tasks", e);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error processing tasks", ex);
+                    }
+                });
+    }
+
+    private void filterTasks() {
+        try {
+            if (filteredTaskList == null) {
+                filteredTaskList = new ArrayList<>();
+            }
+
+            filteredTaskList.clear();
+
+            if (taskList != null) {
+                if ("All".equals(selectedCategory)) {
+                    filteredTaskList.addAll(taskList);
+                } else {
+                    for (Task task : taskList) {
+                        if (matchesCategory(task, selectedCategory)) {
+                            filteredTaskList.add(task);
+                        }
+                    }
                 }
-            });
+            }
+
+            if (taskAdapter != null) {
+                taskAdapter.notifyDataSetChanged();
+            }
+
         } catch (Exception e) {
-            Log.e(TAG, "Error in loadTasks", e);
+            Log.e(TAG, "Error filtering tasks", e);
         }
     }
 
@@ -301,10 +338,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                         } catch (Exception ex) {
                             Toast.makeText(this, "Failed to update task", Toast.LENGTH_SHORT).show();
                         }
+                        // Revert the change
                         task.setCompleted(!task.isCompleted());
-                        if (taskAdapter != null) {
-                            taskAdapter.notifyDataSetChanged();
-                        }
                     });
         } catch (Exception e) {
             Log.e(TAG, "Error toggling task completion", e);
@@ -329,9 +364,9 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             details.append("Description: ").append(task.getDescription()).append("\n\n");
             details.append("Due Date: ").append(task.getFormattedDueDate()).append("\n");
             details.append("Category: ").append(task.getCategory() != null ?
-                    task.getCategory().getDisplayName() : "None").append("\n");
+                    task.getCategory().toString() : "None").append("\n");
             details.append("Priority: ").append(task.getPriority() != null ?
-                    task.getPriority().getDisplayName() : "None").append("\n");
+                    task.getPriority().toString() : "None").append("\n");
             details.append("Status: ").append(task.isCompleted() ? "Completed" : "Pending").append("\n");
 
             if (task.isOverdue()) {
@@ -391,10 +426,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                         } catch (Exception e) {
                             Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
                         }
-                        taskList.remove(task);
-                        if (taskAdapter != null) {
-                            taskAdapter.notifyDataSetChanged();
-                        }
                     })
                     .addOnFailureListener(e -> {
                         Log.w(TAG, "Error deleting task", e);
@@ -414,13 +445,21 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         super.onActivityResult(requestCode, resultCode, data);
 
         try {
-            if (requestCode == EDIT_TASK_REQUEST && resultCode == RESULT_OK) {
-                loadTasks();
-                try {
-                    Toasty.success(this, "Task updated successfully", Toasty.LENGTH_SHORT, true).show();
-                } catch (Exception e) {
-                    Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+            if (resultCode == RESULT_OK) {
+                if (requestCode == EDIT_TASK_REQUEST) {
+                    try {
+                        Toasty.success(this, "Task updated successfully", Toasty.LENGTH_SHORT, true).show();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (requestCode == ADD_TASK_REQUEST) {
+                    try {
+                        Toasty.success(this, "Task added successfully", Toasty.LENGTH_SHORT, true).show();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Task added successfully", Toast.LENGTH_SHORT).show();
+                    }
                 }
+                // loadTasks() akan dipanggil otomatis karena menggunakan addSnapshotListener
             }
         } catch (Exception e) {
             Log.e(TAG, "Error in onActivityResult", e);
@@ -431,7 +470,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     protected void onResume() {
         super.onResume();
         try {
-            loadTasks();
+            // Tidak perlu panggil loadTasks() karena sudah menggunakan realtime listener
+            Log.d(TAG, "MainActivity resumed");
         } catch (Exception e) {
             Log.e(TAG, "Error in onResume", e);
         }

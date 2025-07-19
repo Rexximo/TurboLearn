@@ -8,7 +8,6 @@ import java.text.ParseException;
 import java.util.Locale;
 
 public class Task {
-    // Enums for better type safety
     public enum TaskCategory {
         PERSONAL("Personal"),
         WORK("Work"),
@@ -44,8 +43,8 @@ public class Task {
         }
     }
 
-    // Fields
     private String id;
+    private String userId; // Tambahan: ID pengguna pemilik task
     private String title;
     private String description;
     private Date dueDate;
@@ -56,19 +55,19 @@ public class Task {
     private Date createdAt;
     private Date updatedAt;
 
-    // Date formatter for consistent formatting
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
-    // Required empty constructor for Firestore
+    // Constructor kosong untuk Firebase
     public Task() {
         this.createdAt = new Date();
         this.updatedAt = new Date();
     }
 
-    // Main constructor
-    public Task(String title, String description, Date dueDate, TaskCategory category) {
+    // Constructor utama dengan userId
+    public Task(String userId, String title, String description, Date dueDate, TaskCategory category) {
         this();
         this.id = UUID.randomUUID().toString();
+        this.userId = userId;
         setTitle(title);
         setDescription(description);
         this.dueDate = dueDate;
@@ -78,13 +77,13 @@ public class Task {
         this.timestamp = System.currentTimeMillis();
     }
 
-    // Constructor with priority
-    public Task(String title, String description, Date dueDate, TaskCategory category, Priority priority) {
-        this(title, description, dueDate, category);
+    // Constructor lengkap dengan priority
+    public Task(String userId, String title, String description, Date dueDate, TaskCategory category, Priority priority) {
+        this(userId, title, description, dueDate, category);
         this.priority = priority != null ? priority : Priority.MEDIUM;
     }
 
-    // Legacy constructor for backward compatibility (if needed)
+    // Constructor kompatibilitas lama
     public Task(String title, String description, String date, String time, String category) {
         this();
         this.id = UUID.randomUUID().toString();
@@ -97,13 +96,21 @@ public class Task {
         this.timestamp = System.currentTimeMillis();
     }
 
-    // Getters and Setters with validation
+    // Getters & Setters
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getTitle() {
@@ -159,7 +166,7 @@ public class Task {
     }
 
     public void setCompleted(boolean completed) {
-        this.isCompleted = completed;
+        isCompleted = completed;
         updateTimestamp();
     }
 
@@ -187,7 +194,7 @@ public class Task {
         this.updatedAt = updatedAt;
     }
 
-    // Utility methods
+    // Utilities
     public boolean isOverdue() {
         if (dueDate == null || isCompleted) {
             return false;
@@ -200,11 +207,9 @@ public class Task {
     }
 
     public long getDaysUntilDue() {
-        if (dueDate == null) {
-            return Long.MAX_VALUE;
-        }
-        long diffInMillis = dueDate.getTime() - System.currentTimeMillis();
-        return diffInMillis / (24 * 60 * 60 * 1000);
+        if (dueDate == null) return Long.MAX_VALUE;
+        long diff = dueDate.getTime() - System.currentTimeMillis();
+        return diff / (24 * 60 * 60 * 1000);
     }
 
     public void markAsCompleted() {
@@ -215,7 +220,6 @@ public class Task {
         setCompleted(false);
     }
 
-    // Helper methods for backward compatibility
     public String getDate() {
         return dueDate != null ? new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(dueDate) : "";
     }
@@ -232,7 +236,6 @@ public class Task {
         updateDateTimeFromStrings(getDate(), time);
     }
 
-    // Legacy string category support
     public void setCategoryFromString(String categoryStr) {
         if (categoryStr == null || categoryStr.trim().isEmpty()) {
             this.category = TaskCategory.OTHER;
@@ -250,7 +253,6 @@ public class Task {
         return category != null ? category.name() : TaskCategory.OTHER.name();
     }
 
-    // Private helper methods
     private void updateTimestamp() {
         this.updatedAt = new Date();
         this.timestamp = System.currentTimeMillis();
@@ -263,8 +265,8 @@ public class Task {
         }
 
         try {
-            String dateTimeStr = date + " " + (time != null ? time : "00:00");
-            this.dueDate = DATE_FORMAT.parse(dateTimeStr);
+            String dateTime = date + " " + (time != null ? time : "00:00");
+            this.dueDate = DATE_FORMAT.parse(dateTime);
         } catch (ParseException e) {
             this.dueDate = null;
         }
@@ -275,25 +277,24 @@ public class Task {
         updateTimestamp();
     }
 
-    // Override equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Task)) return false;
         Task task = (Task) o;
-        return Objects.equals(id, task.id);
+        return Objects.equals(id, task.id) && Objects.equals(userId, task.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, userId);
     }
 
-    // Override toString for debugging
     @Override
     public String toString() {
         return "Task{" +
                 "id='" + id + '\'' +
+                ", userId='" + userId + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", dueDate=" + getFormattedDueDate() +

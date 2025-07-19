@@ -13,6 +13,9 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
@@ -74,6 +77,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         if (holder.textViewPriority != null) {
             setPriorityColors(holder, task);
         }
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && !currentUser.getUid().equals(task.getUserId())) {
+            holder.cardView.setVisibility(View.GONE);
+            holder.cardView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+            return;
+        }
+
 
         // Set overdue indicator
         setOverdueIndicator(holder, task);
