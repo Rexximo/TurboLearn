@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/icon_profile.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Kepala (lingkaran) -->
+    <path
+        android:fillColor="#FF0059"
+        android:pathData="M12,2a5,5 0 1,0 0,10a5,5 0 1,0 0,-10" />
+
+    <!-- Badan (setengah oval) -->
+    <path
+        android:fillColor="#FF0059"
+        android:pathData="M12,14c-5.33,0 -10,2.67 -10,6v2h20v-2c0,-3.33 -4.67,-6 -10,-6z" />
+</vector>

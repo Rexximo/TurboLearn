@@ -20,6 +20,9 @@
         android:theme="@style/Theme.TurboLearn"
         tools:targetApi="31">
         <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditTaskActivity"
             android:exported="false" />
         <activity
@@ -44,7 +47,8 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".AlarmActionReceiver"
+        <receiver
+            android:name=".AlarmActionReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="DISMISS_ALARM" />

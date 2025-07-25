@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_container"
+    android:layout_width="0dp"
+    android:layout_height="120dp"
+    android:layout_weight="1"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/completed_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/category_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reading"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/completed_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selesai"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:alpha="0.8"
+            android:textAlignment="center" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

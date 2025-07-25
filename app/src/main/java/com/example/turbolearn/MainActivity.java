@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +32,7 @@ import es.dmoral.toasty.Toasty;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener {
 
+
     private static final String TAG = "MainActivity";
     private static final int EDIT_TASK_REQUEST = 1001;
     private static final int ADD_TASK_REQUEST = 1002;
@@ -41,15 +44,23 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private FirebaseFirestore db;
     private Spinner spinnerCategory;
     private TextView tvWelcome; // Tambahan untuk menampilkan nama user
+
     private String selectedCategory = "All";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         try {
             Log.d(TAG, "Starting MainActivity onCreate");
             setContentView(R.layout.activity_main);
+
+            ImageButton btnProfile = findViewById(R.id.buttonProfile);
+            btnProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            });
 
             // Initialize views with null checks
             if (!initializeViews()) {

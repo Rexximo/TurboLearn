@@ -51,12 +51,21 @@
 
                 <Spinner
                     android:id="@+id/spinnerCategory"
-                    android:layout_width="0dp"
+                    android:layout_width="158dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:background="@drawable/spinner_background_white"
                     android:paddingStart="12dp"
+                    android:layout_marginEnd="12dp"
                     android:paddingEnd="12dp" />
+
+                <ImageButton
+                    android:id="@+id/buttonProfile"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/button_edit"
+                    android:src="@drawable/profile"
+                    android:contentDescription="Edit Task" />
 
             </LinearLayout>
 

@@ -28,7 +28,7 @@ public class SplashActivity extends AppCompatActivity {
         runnable = new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, RegisterActivity.class);
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.accelerate_interpolator, android.R.anim.accelerate_interpolator);
                 finish();

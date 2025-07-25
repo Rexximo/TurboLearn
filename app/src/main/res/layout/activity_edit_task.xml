@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,7 +7,32 @@
     android:fillViewport="true"
     tools:context=".EditTaskActivity">
 
+    <!-- Header -->
     <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorPrimary"
+        android:padding="16dp"
+        android:elevation="4dp">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TurboLearn"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_below="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -21,7 +46,6 @@
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="@color/colorPrimary"
-            android:gravity="center"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="32dp" />
 
@@ -195,4 +219,4 @@
 
     </LinearLayout>
 
-</ScrollView>
+</RelativeLayout>
