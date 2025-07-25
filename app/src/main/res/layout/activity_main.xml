@@ -62,6 +62,17 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/kerjakan_tugas"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_margin="8dp"
+            />
+
         <!-- Tasks List -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewTasks"

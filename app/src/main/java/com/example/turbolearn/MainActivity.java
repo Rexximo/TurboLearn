@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private List<Task> filteredTaskList;
     private FirebaseFirestore db;
     private Spinner spinnerCategory;
+    private TextView tvWelcome; // Tambahan untuk menampilkan nama user
     private String selectedCategory = "All";
 
     @Override
@@ -65,6 +68,11 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             }
 
             Log.d(TAG, "Firestore setup successful");
+
+            // Cek autentikasi user dan load nama
+            if (!checkUserAuthentication()) {
+                return;
+            }
 
             setupRecyclerView();
             Log.d(TAG, "RecyclerView setup complete");
@@ -107,6 +115,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 return false;
             }
 
+            // Tambahan: inisialisasi TextView untuk welcome message
+            tvWelcome = findViewById(R.id.tvWelcome);
+            if (tvWelcome == null) {
+                Log.w(TAG, "tvWelcome not found in layout, will skip user name display");
+            }
+
             return true;
         } catch (Exception e) {
             Log.e(TAG, "Error initializing views", e);
@@ -125,6 +139,73 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         } catch (Exception e) {
             Log.e(TAG, "Error setting up Firestore", e);
             return false;
+        }
+    }
+
+    // Tambahan: Method untuk cek autentikasi dan load nama user
+    private boolean checkUserAuthentication() {
+        try {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser != null) {
+                // User sudah login, ambil data nama dari Firestore
+                getUserData(currentUser.getUid());
+                return true;
+            } else {
+                // User belum login, redirect ke LoginActivity
+                Log.w(TAG, "User not authenticated, redirecting to login");
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking user authentication", e);
+            return true; // Continue with app even if user name loading fails
+        }
+    }
+
+    // Tambahan: Method untuk mengambil data user dari Firestore
+    private void getUserData(String userId) {
+        try {
+            Log.d(TAG, "Getting user data for UID: " + userId);
+
+            db.collection("users").document(userId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        try {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // Ambil data nama dari dokumen
+                                    String userName = document.getString("name");
+                                    if (userName != null && !userName.isEmpty() && tvWelcome != null) {
+                                        // Tampilkan nama di TextView
+                                        tvWelcome.setText("Kerjakan tugas, " + userName + "!");
+                                        Log.d(TAG, "User name loaded: " + userName);
+                                    } else {
+                                        if (tvWelcome != null) {
+                                            tvWelcome.setText("Selamat datang!");
+                                        }
+                                        Log.w(TAG, "User name is null or empty");
+                                    }
+                                } else {
+                                    Log.w(TAG, "User document does not exist");
+                                    if (tvWelcome != null) {
+                                        tvWelcome.setText("Selamat datang!");
+                                    }
+                                }
+                            } else {
+                                Log.e(TAG, "Error getting user data", task.getException());
+                                if (tvWelcome != null) {
+                                    tvWelcome.setText("Selamat datang!");
+                                }
+                                // Don't show error toast for user data loading failure
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error processing user data", e);
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in getUserData", e);
         }
     }
 

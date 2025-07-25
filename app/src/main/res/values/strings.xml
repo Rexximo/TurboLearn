@@ -10,4 +10,6 @@
     <string name="have_an_account">Have an account?</string>
     <string name="login_here">Login here</string>
     <string name="registrasi">Register</string>
+    <string name="username">Username</string>
+    <string name="kerjakan_tugas">Kerjakan tugas !</string>
 </resources>
