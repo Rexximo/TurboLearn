@@ -1,4 +1,5 @@
 # Dependencies yang dipakai 
+```javascript
 dependencies {
 
     implementation(libs.appcompat)
@@ -39,3 +40,5 @@ dependencies {
     implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
 }
+
+```
