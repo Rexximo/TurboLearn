@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private LinearLayout cardsContainer;
     private List<Task> allTasks = new ArrayList<>();
+    private TextView tvWelcome; // TextView untuk menampilkan nama user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +34,71 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         cardsContainer = findViewById(R.id.cards_container);
+        tvWelcome = findViewById(R.id.tvWelcome); // Pastikan ID ini ada di layout
         db = FirebaseFirestore.getInstance();
 
+        // Load user data first
+        loadUserData();
         loadTasksFromFirebase();
+    }
+
+    private void loadUserData() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            getUserData(userId);
+        } else {
+            // Set default welcome message if no user is logged in
+            if (tvWelcome != null) {
+                tvWelcome.setText("Selamat datang!");
+            }
+        }
+    }
+
+    private void getUserData(String userId) {
+        try {
+            Log.d(TAG, "Getting user data for UID: " + userId);
+
+            db.collection("users").document(userId)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        try {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    // Ambil data nama dari dokumen
+                                    String userName = document.getString("name");
+                                    if (userName != null && !userName.isEmpty() && tvWelcome != null) {
+                                        // Tampilkan nama di TextView
+                                        tvWelcome.setText(userName);
+                                        Log.d(TAG, "User name loaded: " + userName);
+                                    } else {
+                                        if (tvWelcome != null) {
+                                            tvWelcome.setText("Selamat datang!");
+                                        }
+                                        Log.w(TAG, "User name is null or empty");
+                                    }
+                                } else {
+                                    Log.w(TAG, "User document does not exist");
+                                    if (tvWelcome != null) {
+                                        tvWelcome.setText("Selamat datang!");
+                                    }
+                                }
+                            } else {
+                                Log.e(TAG, "Error getting user data", task.getException());
+                                if (tvWelcome != null) {
+                                    tvWelcome.setText("Selamat datang!");
+                                }
+                                // Don't show error toast for user data loading failure
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error processing user data", e);
+                        }
+                    });
+        } catch (Exception e) {
+            Log.e(TAG, "Error in getUserData", e);
+        }
     }
 
     private void loadTasksFromFirebase() {
@@ -117,6 +181,7 @@ public class ProfileActivity extends AppCompatActivity {
         TextView categoryNameText = cardView.findViewById(R.id.category_name);
         TextView completedCountText = cardView.findViewById(R.id.completed_count);
         TextView completedLabel = cardView.findViewById(R.id.completed_label);
+        ImageView categorySilhouette = cardView.findViewById(R.id.imageViewCategorySilhouette);
 
         // Set content
         categoryNameText.setText(category.getDisplayName());
@@ -125,6 +190,9 @@ public class ProfileActivity extends AppCompatActivity {
         // Set card color based on category
         int cardColor = getCategoryColor(category);
         cardContainer.setCardBackgroundColor(ContextCompat.getColor(this, cardColor));
+
+        // Set category silhouette
+        setCategorySilhouette(categorySilhouette, category);
 
         // Set text color for better contrast
         int textColor = getTextColorForBackground(category);
@@ -140,6 +208,37 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Add to parent row
         parentRow.addView(cardView);
+    }
+
+    private void setCategorySilhouette(ImageView silhouetteView, Task.TaskCategory category) {
+        if (silhouetteView == null) return;
+
+        int silhouetteDrawable;
+
+        // Set silhouette drawable based on category (same logic as TaskAdapter)
+        switch (category) {
+            case PERSONAL:
+                silhouetteDrawable = R.drawable.ic_person_silhouette;
+                break;
+            case WORK:
+                silhouetteDrawable = R.drawable.ic_work_silhouette;
+                break;
+            case STUDY:
+                silhouetteDrawable = R.drawable.ic_study_silhouette;
+                break;
+            case HEALTH:
+                silhouetteDrawable = R.drawable.ic_health_silhouette;
+                break;
+            case OTHER:
+            default:
+                silhouetteDrawable = R.drawable.ic_category_other_silhouette;
+                break;
+        }
+
+        silhouetteView.setImageResource(silhouetteDrawable);
+
+        // Set appropriate alpha for background silhouette
+        silhouetteView.setAlpha(0.15f);
     }
 
     private int getCategoryColor(Task.TaskCategory category) {
@@ -172,6 +271,3 @@ public class ProfileActivity extends AppCompatActivity {
         return Math.round(dp * density);
     }
 }
-
-
-

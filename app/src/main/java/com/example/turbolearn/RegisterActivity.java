@@ -41,13 +41,13 @@ public class RegisterActivity extends AppCompatActivity {
 
             // Validasi Nama
             if (name.isEmpty()) {
-                Toasty.info(this, "Nama tidak boleh kosong", Toasty.LENGTH_SHORT, true).show();
+                Toasty.info(this, "Field Kosong", Toasty.LENGTH_SHORT, true).show();
                 return;
             }
 
             // Validasi Email
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "Email tidak valid", Toast.LENGTH_SHORT).show();
+                Toasty.info(this, "Email tidak valid", Toasty.LENGTH_SHORT, true).show();
                 return;
             }
 
@@ -69,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-            // Jika lolos semua validasi, lakukan register
+
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -86,12 +86,11 @@ public class RegisterActivity extends AppCompatActivity {
                                             Log.d("RegisterActivity", "User data saved successfully");
                                             Toasty.success(this, "Register Berhasil", Toasty.LENGTH_SHORT, true).show();
                                             startActivity(new Intent(this, LoginActivity.class));
-                                            finish(); // Tutup RegisterActivity
+                                            finish();
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.e("RegisterActivity", "Error saving user data", e);
                                             Toasty.error(this, "Gagal menyimpan data: " + e.getMessage(), Toasty.LENGTH_LONG, true).show();
-                                            // Hapus user authentication jika gagal simpan data
                                             user.delete();
                                         });
                             }

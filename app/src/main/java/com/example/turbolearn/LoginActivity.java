@@ -5,16 +5,11 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 
 import es.dmoral.toasty.Toasty;
 
@@ -34,16 +29,36 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         btnLogin.setOnClickListener(v -> {
-            String email = etEmail.getText().toString();
-            String password = etPassword.getText().toString();
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
 
+            // Validasi input kosong
+            if (email.isEmpty() && password.isEmpty()) {
+                Toasty.warning(this, "Email dan password tidak boleh kosong", Toasty.LENGTH_SHORT, true).show();
+                return;
+            }
+
+            if (email.isEmpty()) {
+                Toasty.warning(this, "Email tidak boleh kosong", Toasty.LENGTH_SHORT, true).show();
+                etEmail.requestFocus();
+                return;
+            }
+
+            if (password.isEmpty()) {
+                Toasty.warning(this, "Password tidak boleh kosong", Toasty.LENGTH_SHORT, true).show();
+                etPassword.requestFocus();
+                return;
+            }
+
+            // Proses login jika validasi berhasil
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toasty.success(this, "Login Successful", Toasty.LENGTH_SHORT, true).show();
+                            Toasty.success(this, "Login Berhasil", Toasty.LENGTH_SHORT, true).show();
                             startActivity(new Intent(this, MainActivity.class));
+                            finish();
                         } else {
-                            Toasty.error(this, "Email or password incorrect", Toasty.LENGTH_SHORT, true).show();
+                            Toasty.error(this, "Email atau password salah", Toasty.LENGTH_SHORT, true).show();
                         }
                     });
         });
@@ -55,6 +70,5 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
-
     }
 }

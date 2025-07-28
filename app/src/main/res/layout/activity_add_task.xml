@@ -28,15 +28,16 @@
 
     </LinearLayout>
 
-
-
     <LinearLayout
-        android:layout_below="@+id/header"
+        android:id="@+id/title"
         android:layout_width="match_parent"
+        android:layout_below="@+id/header"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
 
+        <!-- Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -44,9 +45,20 @@
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="@color/colorPrimary"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp" />
 
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:layout_below="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
 
 
         <com.google.android.material.textfield.TextInputLayout
@@ -113,26 +125,51 @@
             android:textAlignment="center"
             android:textSize="16sp" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginBottom="8dp" />
+
         <Spinner
             android:id="@+id/spinnerCategory"
             android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/spinner_background"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"  />
+
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:text="Priority"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginBottom="8dp" />
 
         <Spinner
             android:id="@+id/spinnerPriority"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_height="56dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/spinner_background"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"  />
 
         <Button
             android:id="@+id/buttonSaveTask"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Save Task"
-            android:backgroundTint="?attr/colorPrimary"
-            android:textColor="@android:color/white" />
+            android:layout_width="150dp"
+            android:layout_height="56dp"
+            android:text="Add Task"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            />
 
     </LinearLayout>
 

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -73,6 +74,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         // Set category colors and background
         setCategoryColors(holder, task);
 
+        // Set category silhouette
+        setCategorySilhouette(holder, task);
+
         // Set priority colors if priority TextView exists
         if (holder.textViewPriority != null) {
             setPriorityColors(holder, task);
@@ -84,7 +88,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.cardView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
             return;
         }
-
 
         // Set overdue indicator
         setOverdueIndicator(holder, task);
@@ -104,6 +107,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             // Reduce opacity
             holder.cardView.setAlpha(0.6f);
 
+            // Also reduce silhouette opacity for completed tasks
+            if (holder.imageViewCategorySilhouette != null) {
+                holder.imageViewCategorySilhouette.setAlpha(0.05f);
+            }
+
             // Change card background for completed tasks
             holder.cardView.setCardBackgroundColor(
                     ContextCompat.getColor(context, R.color.completed_task_background));
@@ -116,8 +124,50 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             // Reset opacity
             holder.cardView.setAlpha(1.0f);
+
+            // Reset silhouette opacity
+            if (holder.imageViewCategorySilhouette != null) {
+                holder.imageViewCategorySilhouette.setAlpha(0.1f);
+            }
         }
     }
+
+    private void setCategorySilhouette(TaskViewHolder holder, Task task) {
+
+        if (holder.imageViewCategorySilhouette == null) return;
+
+        if (task.getCategory() == null) {
+            holder.imageViewCategorySilhouette.setImageResource(R.drawable.ic_category_other_silhouette);
+            return;
+        }
+
+        int silhouetteDrawable;
+
+        // Set silhouette drawable based on category
+        switch (task.getCategory()) {
+            case PERSONAL:
+                silhouetteDrawable = R.drawable.ic_person_silhouette;
+                break;
+            case WORK:
+                silhouetteDrawable = R.drawable.ic_work_silhouette;
+                break;
+            case STUDY:
+                silhouetteDrawable = R.drawable.ic_study_silhouette;
+                break;
+            case HEALTH:
+                silhouetteDrawable = R.drawable.ic_health_silhouette;
+                break;
+            case OTHER:
+            default:
+                silhouetteDrawable = R.drawable.ic_category_other_silhouette;
+                break;
+        }
+
+        holder.imageViewCategorySilhouette.setImageResource(silhouetteDrawable);
+
+    }
+
+
 
     private void setCategoryColors(TaskViewHolder holder, Task task) {
         if (task.getCategory() == null) {
@@ -299,11 +349,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView textViewDescription;
         TextView textViewDateTime;
         TextView textViewCategory;
-        TextView textViewPriority;  // Optional - add to layout if needed
-        TextView textViewOverdue;   // Optional - add to layout if needed
+        TextView textViewPriority;
+        TextView textViewOverdue;
         ImageButton buttonEdit;
         ImageButton buttonDelete;
-        ImageButton buttonToggleComplete;  // Optional - add to layout if needed
+        ImageButton buttonToggleComplete;
+        ImageView imageViewCategorySilhouette;  // New silhouette view
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -319,6 +370,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             textViewPriority = itemView.findViewById(R.id.textViewPriority);
             textViewOverdue = itemView.findViewById(R.id.textViewOverdue);
             buttonToggleComplete = itemView.findViewById(R.id.buttonToggleComplete);
+            imageViewCategorySilhouette = itemView.findViewById(R.id.imageViewCategorySilhouette);
         }
     }
 }
