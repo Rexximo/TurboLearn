@@ -1,4 +1,4 @@
-# Dependencies yang dipakai 
+# Dependencies yang ditambahkan:
 ```javascript
 dependencies {
 
@@ -27,5 +27,15 @@ dependencies {
     implementation ("androidx.work:work-runtime-ktx:2.9.0")
 
 }
+
+```
+# Permission yang dipakai:
+```javascript
+<uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 ```
