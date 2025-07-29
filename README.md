@@ -41,8 +41,6 @@ User bisa melihat jumlah tugas yang telah dia kerjakan berdasarkan kategori<br>
 <img src="img/halaman profile.jpg" style="width:20%; height:auto;"><br><br>
 
 # Dependencies yang ditambahkan:
-Berikut penjelasan singkat masing-masing dependencies dalam `build.gradle` kamu:
-
 ---
 
 ### 🎨 **UI & Komponen Tampilan**
@@ -147,6 +145,29 @@ dependencies {
 
 ```
 # Permission yang dipakai:
+1. **`android.permission.INTERNET`**
+   ➤ Mengizinkan aplikasi untuk mengakses internet.
+   ➤ Digunakan untuk koneksi API, Firebase, mengunduh/upload data, dll.
+
+2. **`android.permission.ACCESS_NETWORK_STATE`**
+   ➤ Mengizinkan aplikasi untuk mengetahui status jaringan (tersambung ke internet atau tidak).
+   ➤ Berguna untuk mengecek koneksi sebelum memuat data online.
+
+3. **`android.permission.POST_NOTIFICATIONS`** (Android 13 ke atas)
+   ➤ Meminta izin dari pengguna untuk menampilkan notifikasi.
+   ➤ Wajib digunakan jika aplikasi menampilkan notifikasi di Android 13+.
+
+4. **`android.permission.VIBRATE`**
+   ➤ Mengizinkan aplikasi untuk menggunakan getar (vibrator) pada perangkat.
+   ➤ Umumnya digunakan untuk notifikasi atau feedback sentuhan.
+
+5. **`android.permission.RECEIVE_BOOT_COMPLETED`**
+   ➤ Mengizinkan aplikasi untuk menerima broadcast saat perangkat selesai booting.
+   ➤ Berguna jika aplikasi ingin menjadwalkan ulang alarm/notifikasi setelah restart.
+
+6. **`android.permission.WAKE_LOCK`**
+   ➤ Mengizinkan aplikasi untuk menjaga perangkat tetap aktif (layar atau CPU tidak tidur).
+   ➤ Digunakan dalam aplikasi dengan background task penting, seperti alarm atau musik.
 ```javascript
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
