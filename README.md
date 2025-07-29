@@ -42,7 +42,7 @@ dependencies {
 # Tampilan dan fitur aplikasi
 
 1. Splash Screen
-   ...Splash Screen menggunakan animasi dari lottie....
+⋅⋅⋅⋅* Splash Screen menggunakan animasi dari lottie
 <img src="img/splash.jpg" style="width:20%; height:auto;">
 
 2.Register
