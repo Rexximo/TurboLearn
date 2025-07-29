@@ -41,10 +41,11 @@ dependencies {
 ```
 # Tampilan dan fitur aplikasi
 
-1.Splash Screen
-Splash Screen menggunakan animasi dari lottie
+1. Splash Screen
+⋅⋅⋅Splash Screen menggunakan animasi dari lottie.⋅⋅
 <img src="img/splash.jpg" style="width:20%; height:auto;">
 
 2.Register
-User melakukan registrasi dengan menginputkan nama, email, dan password. Password memiliki ketentuan minimal 8 karakter dan maksimal 15 karakter dengan huruf besar dan angka minimal 1 karakter.
+⋅⋅⋅User melakukan registrasi dengan menginputkan nama, email, dan password.⋅⋅⋅
+⋅⋅⋅Password memiliki ketentuan minimal 8 karakter dan maksimal 15 karakter dengan huruf besar dan angka minimal 1 karakter.⋅⋅⋅
 <img src="img/register.jpg" style="width:20%; height:auto;">
