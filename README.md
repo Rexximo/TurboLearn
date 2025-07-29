@@ -39,3 +39,6 @@ dependencies {
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 ```
+# Tampilan dan fitur aplikasi
+1.Splash Screen
+![splash](/UI Mobile/splash.jpg)
