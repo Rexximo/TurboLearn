@@ -48,5 +48,38 @@ Splash Screen menggunakan animasi dari lottie<br>
 2. Register<br>
 User melakukan registrasi dengan menginputkan nama, email, dan password.<br>
 Password memiliki ketentuan minimal 8 karakter dan maksimal 15 karakter dengan huruf besar dan angka minimal 1 karakter.<br>
-<img src="img/register.jpg" style="width:20%; height:auto;">
+<img src="img/register.jpg" style="width:20%; height:auto;"><br><br>
+
+3. Login<br>
+User harus menginpukan email dan password valid yang sudah didaftarkan sebelumnya<br>
+<img src="img/login.jpg" style="width:20%; height:auto;"><br><br>
+
+4. Home<br>
+User bisa melihat tugas yang telah mereka buat dan mereka juga bisa menghapunya disini.<br>
+Tugas disini memiliki kategori tertentu dan dipadukan dengan warna yang berbeda<br>
+contohnya untuk kategori Study diwarnai dengan warna hijau.<br>
+<img src="img/home.jpg" style="width:20%; height:auto;"><br><br>
+
+5. Home (menampilkan tugas berdasarkan kategori tertentu)<br>
+User bisa melihat tugas berdasarkan kategori tertentu<br>
+<img src="img/task berdasarkan kategori.jpg" style="width:20%; height:auto;"><br><br>
+
+6. Add Task<br>
+User menginputkan judul, deskripsi, tanggal dan jam untuk pengingat tugas yang dapat memunculkan alarm setelah tanggal dan jam tertentu,<br>
+menginputkan kategori tugas yang terdiri dari kategori personal, work, study health dan other, dan prioritas tugas yang terdiri dari low, medium, hight, dan urgent.<br>
+<img src="img/add.jpg" style="width:20%; height:auto;"><br><br>
+
+7. Edit Task<br>
+User bisa mengedit atau mengubah tugas yang telah dibuat sebelumnya<br>
+<img src="img/edit.jpg" style="width:20%; height:auto;"><br><br>
+
+8. Tandai Tugas Yang Selesai<br>
+User bisa menandai tugas yang telah diselesaikan dan tugas yang telah selesai akan muncul di halaman profile<br>
+<img src="img/tugas selsai.jpg" style="width:20%; height:auto;"><br><br>
+
+9. Profile<br>
+User bisa melihat jumlah tugas yang telah dia kerjakan berdasarkan kategori<br>
+<img src="img/halaman profile.jpg" style="width:20%; height:auto;"><br><br>
+
+
 
