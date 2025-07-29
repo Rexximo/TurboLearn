@@ -40,6 +40,6 @@ dependencies {
 
 ```
 # Tampilan dan fitur aplikasi
-1.Splash Screen
 
-![splash](UI Mobile/splash.jpg)
+1.Splash Screen
+![splash](img/splash.jpg)
