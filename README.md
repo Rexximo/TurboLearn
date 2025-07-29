@@ -42,4 +42,5 @@ dependencies {
 # Tampilan dan fitur aplikasi
 
 1.Splash Screen
-![splash](img/splash.jpg = 250x)
+![splash](img/splash.jpg)
+<img src="img/splash.jpg" style="width:50%; height:auto;">
